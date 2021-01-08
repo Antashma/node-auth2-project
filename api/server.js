@@ -1,5 +1,8 @@
 const express = require('express');
 const server = express();
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const secrets = require('./secrets.js');
 
 const dbUser = require('./model.js');
 
@@ -29,6 +32,8 @@ server.post('/api/register', async (req, res) => {
         })
     } else {
         try {
+            const hash = bcrypt.hashSync(reg.password, 10);
+            reg.password = hash
             const registered = await dbUser.register(reg);
             res.status(201).json({
                 message: 'User registered!',
@@ -68,6 +73,22 @@ server.post('/api/login', async (req, res) => {
     }
 })
 
+// -------------------- //
+// WEB TOKEN GEN
+// -------------------- //
+function jwtGenerator(user) {
+    const payload = {
+      subject: user.id,
+      username: user.username,
+      dept: user.department
+    }
+    const secret = secrets.jwt_secret;
+    const options = {
+      expiresIn: 60
+    };
+  
+    return jwt.sign(payload, secret, options);
+  } 
 
 
 module.exports = server;
