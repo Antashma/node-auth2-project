@@ -56,13 +56,15 @@ server.post('/api/login', async (req, res) => {
     } else {
         try {
             const found_user = await dbUser.findUserByName(username)
-            if (!found_user || found_user.password !== password) {
-                res.status(400).json({
+            if (!found_user || !bcrypt.compareSync(password, found_user.password)) {
+                res.status(401).json({
                     errorMsg: 'You shall not pass!'
                 })
             } else {
+                const token = await jwtGenerator(found_user);
                 res.status(200).json({
-                    message: 'User logged in!',
+                    message: `Welcome, ${found_user.username}!`,
+                    token,
                 })
             }
         } catch (error) {
