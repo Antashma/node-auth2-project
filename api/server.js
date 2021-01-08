@@ -3,7 +3,7 @@ const server = express();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const secrets = require('./secrets.js');
-
+const {restricted} = require('./restricted.js')
 const dbUser = require('./model.js');
 
 
@@ -13,7 +13,7 @@ server.get('', (req, res) => {
     res.send({api: 'up'})
 })
 
-server.get('/api/users', async (req, res) => {
+server.get('/api/users', restricted,  async (req, res) => {
     try {
         const users = await dbUser.findUsers();
         res.status(200).json(users);
